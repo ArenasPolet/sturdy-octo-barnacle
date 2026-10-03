@@ -6,8 +6,10 @@ class ProductoForm(forms.ModelForm):
     texto_stock_tallas = forms.CharField(
         label="Stock por Talla",
         widget=forms.TextInput(attrs={
-            'class': 'form-control bg-dark text-light border-secondary', 
-            'placeholder': 'Ej: S:5, M:10, L:2, XL:0'
+            'class': 'form-control border-secondary', 
+            'placeholder': 'Ej: S:5, M:10, L:2, XL:0',
+            # AQUÍ ESTÁ EL TRUCO: Le forzamos el fondo oscuro y el texto claro directamente
+            'style': 'background-color: #212529; color: #ffffff;' 
         }),
         help_text="Escribe la talla seguida de dos puntos y la cantidad separadas por comas."
     )
@@ -16,10 +18,10 @@ class ProductoForm(forms.ModelForm):
         model = Producto
         fields = ['nombre', 'descripcion', 'precio', 'texto_stock_tallas', 'imagen']
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control bg-dark text-light border-secondary'}),
-            'descripcion': forms.Textarea(attrs={'class': 'form-control bg-dark text-light border-secondary', 'rows': 3}),
-            'precio': forms.NumberInput(attrs={'class': 'form-control bg-dark text-light border-secondary'}),
-            'imagen': forms.ClearableFileInput(attrs={'class': 'form-control bg-dark text-light border-secondary'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control border-secondary', 'style': 'background-color: #212529; color: #ffffff;'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control border-secondary', 'rows': 3, 'style': 'background-color: #212529; color: #ffffff;'}),
+            'precio': forms.NumberInput(attrs={'class': 'form-control border-secondary', 'style': 'background-color: #212529; color: #ffffff;'}),
+            'imagen': forms.ClearableFileInput(attrs={'class': 'form-control border-secondary', 'style': 'background-color: #212529; color: #ffffff;'}),
         }
 
     def __init__(self, *args, **kwargs):

@@ -63,3 +63,10 @@ def pedir_personalizado(request):
         form = DisenoPersonalizadoForm()
         
     return render(request, 'tienda/pedir_personalizado.html', {'form': form})
+
+
+@user_passes_test(es_admin, login_url='login')
+def ver_cotizaciones(request):
+    # Traemos todas las cotizaciones ordenadas desde la más nueva a la más vieja
+    cotizaciones = DisenoPersonalizado.objects.all().order_by('-fecha')
+    return render(request, 'tienda/ver_cotizaciones.html', {'cotizaciones': cotizaciones})

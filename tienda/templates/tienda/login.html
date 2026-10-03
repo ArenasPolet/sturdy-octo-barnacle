@@ -1,21 +1,73 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Iniciar Sesión - Store Poleras</title>
+    <link rel="icon" type="image/png" href="{% static 'img/pelota.jpg' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Estilos para el fondo a pantalla completa */
+        body {
+            /* El linear-gradient oscurece un poco la foto para que el texto resalte */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), 
+                        url('{% static "img/baner.jpeg" %}') no-repeat center center fixed;
+            background-size: cover; /* Asegura que la imagen cubra toda la pantalla sin deformarse */
+            height: 100vh; /* Altura del 100% de la ventana */
+            margin: 0;
+            display: flex;
+            align-items: center; /* Centra la caja verticalmente */
+            justify-content: center; /* Centra la caja horizontalmente */
+        }
+
+        /* Estilos para la cajita flotante del formulario */
+        .login-card {
+            background-color: rgba(33, 37, 41, 0.85); /* Fondo oscuro semi-transparente */
+            backdrop-filter: blur(5px); /* Efecto de vidrio esmerilado moderno */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+        }
+
+        /* Arreglos para los inputs que genera Django automáticamente */
+        .login-card input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #6c757d;
+            background-color: #212529;
+            color: white;
+        }
+    </style>
 </head>
-<body class="bg-dark text-light d-flex align-items-center justify-content-center vh-100">
-    <div class="card bg-secondary text-light p-4 shadow-lg border-0" style="width: 100%; max-width: 400px;">
-        <h3 class="text-center mb-4 fw-bold text-warning">🔑 Admin Login</h3>
+<body>
+
+    <div class="login-card shadow-lg text-light">
+        <div class="text-center mb-4">
+            <h2 class="text-warning fw-bold mb-1">⚡ Store Poleras</h2>
+            <p class="text-light opacity-75 small">Acceso exclusivo Administrador</p>
+        </div>
+        
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-warning w-100 fw-bold mt-3">Entrar</button>
+            <!-- El form.as_p dibuja los campos de usuario y contraseña -->
+            {{ form.as_p }} 
+            
+            <button type="submit" class="btn btn-warning w-100 fw-bold mt-3 py-2 rounded-pill shadow">
+                Ingresar al Sistema
+            </button>
         </form>
-        <div class="text-center mt-3">
-            <a href="{% url 'catalogo' %}" class="text-decoration-none text-light small">← Volver al catálogo</a>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'catalogo' %}" class="text-light text-decoration-none opacity-75 small hover-warning">
+                ← Volver al catálogo
+            </a>
         </div>
     </div>
+
 </body>
 </html>

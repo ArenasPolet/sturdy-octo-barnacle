@@ -1,23 +1,82 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Subir Polera - Store Poleras</title>
+    <title>Agregar Polera - Store Poleras</title>
+    <link rel="icon" type="image/png" href="{% static 'img/pelota.jpg' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Fondo a pantalla completa igual que en login y editar */
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
+                        url('{% static "img/baner.jpeg" %}') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+        }
+
+        /* Tarjeta flotante con efecto de vidrio (Glassmorphism) */
+        .add-card {
+            background-color: rgba(33, 37, 41, 0.85);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 600px;
+            padding: 2.5rem;
+        }
+
+        /* Títulos de los campos en color amarillo (warning) para mantener el estilo de la tienda */
+        .add-card label {
+            color: #ffc107; 
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        /* Textos de ayuda (como las instrucciones de las tallas) */
+        .helptext {
+            font-size: 0.8rem;
+            color: #ced4da;;
+            display: block;
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+      /* Fuerza a que el texto de ejemplo (placeholder) sea blanco transparente */
+        .add-card input::placeholder, .edit-card input::placeholder {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+    </style>
 </head>
-<body class="bg-dark text-light">
-    <div class="container py-5" style="max-width: 600px;">
-        <div class="card bg-secondary text-light p-4 shadow-lg border-0">
-            <h2 class="mb-4 text-warning fw-bold text-center">👕 Subir Nueva Polera</h2>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="{% url 'catalogo' %}" class="btn btn-outline-light">Cancelar</a>
-                    <button type="submit" class="btn btn-success fw-bold px-4">Guardar Polera</button>
-                </div>
-            </form>
+<body>
+
+    <div class="add-card shadow-lg text-light">
+        <div class="text-center mb-4">
+            <h2 class="text-warning fw-bold mb-1">➕ Subir Nueva Polera</h2>
+            <p class="text-light opacity-75">Completa los datos para añadirla al catálogo</p>
         </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <div class="d-flex justify-content-between align-items-center mt-5">
+                <a href="{% url 'catalogo' %}" class="text-light text-decoration-none opacity-75 small hover-warning">
+                    ← Volver al catálogo
+                </a>
+                <button type="submit" class="btn btn-warning fw-bold px-4 text-dark rounded-pill shadow">
+                    Subir Polera
+                </button>
+            </div>
+        </form>
     </div>
+
 </body>
 </html>

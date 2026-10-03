@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
-from .views import catalogo, agregar_producto, editar_producto, pedir_personalizado
+from .views import catalogo, agregar_producto, editar_producto, pedir_personalizado, ver_cotizaciones
 
 
 urlpatterns = [
@@ -9,6 +9,7 @@ urlpatterns = [
     path('editar/<int:id>/', editar_producto, name='editar_producto'),
     path('personalizado/', pedir_personalizado, name='pedir_personalizado'),
     path('login/', LoginView.as_view(template_name='tienda/login.html'), name='login'),
+    path('cotizaciones/', ver_cotizaciones, name='ver_cotizaciones'),
     path('logout/', LogoutView.as_view(next_page='catalogo'), name='logout'),
 
 ]
