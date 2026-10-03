@@ -41,9 +41,14 @@
     </nav>
 
     <!-- BANNER PRINCIPAL (HERO SECTION) -->
-    <div class="p-5 mb-5 text-white text-center position-relative overflow-hidden shadow-lg" 
-         style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "img/baner.jpeg" %}') no-repeat center center; background-size: cover; min-height: 400px; display: flex; align-items: center; justify-content: center;">
-        <div class="container py-4">
+    <div class="mb-5 text-white text-center position-relative overflow-hidden shadow-lg" 
+         style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "img/baner.jpeg" %}') no-repeat center center; 
+                background-size: cover; 
+                width: 100%;
+                aspect-ratio: 21/9; /* <-- CAMBIO CLAVE: Mantiene la proporción de la imagen (formato ultra-ancho) */
+                min-height: 450px; /* <-- Evita que el banner colapse o se vea muy pequeño en celulares */
+                display: flex; align-items: center; justify-content: center;">
+        <div class="container py-4 p-5">
             <h1 class="display-4 fw-bold text-warning mb-3">Estilo Urbano y Exclusivo</h1>
             <p class="lead mb-4 text-light opacity-75">Las mejores poleras con diseños únicos. Pide directamente por WhatsApp.</p>
             <a href="#seccion-productos" class="btn btn-warning btn-lg fw-bold px-4 shadow">Ver Catálogo 👇</a>
@@ -108,7 +113,7 @@
             </div>
             {% endfor %}
         </div>
-        <!-- SECCIÓN DE POLERA PERSONALIZADA -->
+        <!-- SECCIÓN DE PEDIDOPOLERA  -->
         <div class="mt-5 p-5 bg-black rounded-4 shadow-lg border border-secondary text-center">
             <h2 class="fw-bold text-white mb-3">¿No encuentras lo que buscas? </h2>
             <p class="text-light opacity-75 fs-5 mb-4">Sube tu imagen, dinos qué talla buscas y te la conseguimos.</p>
