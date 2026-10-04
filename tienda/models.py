@@ -22,6 +22,7 @@ class DisenoPersonalizado(models.Model):
     imagen = models.ImageField(upload_to='personalizados/')
     detalle = models.TextField(blank=True, help_text="Ej: Talla M, en polera negra...")
     fecha = models.DateTimeField(auto_now_add=True)
-
+    telefono = models.CharField(max_length=15, blank=True, null=True, verbose_name="Número de WhatsApp")
+    nombre = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nombre del Cliente")
     def __str__(self):
         return f"Diseño Personalizado #{self.id}"

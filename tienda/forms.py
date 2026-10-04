@@ -54,7 +54,7 @@ class ProductoForm(forms.ModelForm):
 class DisenoPersonalizadoForm(forms.ModelForm):
     class Meta:
         model = DisenoPersonalizado
-        fields = ['imagen', 'detalle']
+        fields = ['imagen', 'detalle','nombre','telefono']
         widgets = {
             'imagen': forms.ClearableFileInput(attrs={'class': 'form-control bg-dark text-light border-secondary', 'required': 'required'}),
             'detalle': forms.Textarea(attrs={
@@ -62,4 +62,27 @@ class DisenoPersonalizadoForm(forms.ModelForm):
                 'rows': 3, 
                 'placeholder': 'Ej: Quiero este diseño en una polera negra, talla L...'
             }),
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control border-secondary', 
+                'placeholder': 'Ej: Juan Pérez',
+                'style': 'background-color: #212529; color: #ffffff;'
+            }),
+            # Agregamos el diseño para el teléfono
+            'telefono': forms.TextInput(attrs={
+                'class': 'form-control border-secondary', 
+                'placeholder': 'Ej: +56912345678',
+                'style': 'background-color: #212529; color: #ffffff;'
+            }),
         }
+
+#  función para que los campos sean obligatorios en la página
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Hacemos que nombre, teléfono e imagen sean 100% obligatorios
+        self.fields['nombre'].required = True
+        self.fields['telefono'].required = True
+        self.fields['imagen'].required = True
+        
+        # El detalle queda opcional por si la imagen ya lo explica todo
+        self.fields['detalle'].required = False

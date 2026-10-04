@@ -70,8 +70,27 @@
                             
                             <small class="text-light opacity-75">📅 {{ cotizacion.fecha|date:"d/m/Y H:i" }}</small>
                         </div>
+                        <!-- Nuevo bloque para el Nombre del Cliente -->
+                        <div class="mb-3 pb-2 border-bottom border-secondary border-opacity-50">
+                            <strong class="text-info">👤 Cliente:</strong>
+                            <span class="text-white fs-5 ms-2">{{ cotizacion.nombre|default:"No registrado" }}</span>
+                        </div>
+
+                        <!-- Bloque del Teléfono -->
+                        <p class="card-text text-light mb-3">
+                            <strong class="text-success">📞 WhatsApp:</strong><br>
+                            {% if cotizacion.telefono %}
+                                <a href="https://wa.me/{{ cotizacion.telefono|cut:'+'|cut:' ' }}" target="_blank" class="text-light text-decoration-none hover-warning fw-bold">
+                                    {{ cotizacion.telefono }} <span class="fs-6 opacity-75">💬 (Chat)</span>
+                                </a>
+                            {% else %}
+                                <span class="text-light opacity-50 fst-italic">No registrado</span>
+                            {% endif %}
+                        </p>
+
+                        <!-- Detalles del diseño -->
                         <p class="card-text text-light">
-                            <strong class="text-warning">Detalles del cliente:</strong><br>
+                            <strong class="text-warning">Detalles del diseño:</strong><br>
                             {{ cotizacion.detalle|default:"Sin detalles adicionales." }}
                         </p>
                         <!-- Botón para ver la imagen en grande -->
