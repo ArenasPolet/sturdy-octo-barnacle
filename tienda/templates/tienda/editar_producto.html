@@ -1,25 +1,22 @@
+{% extends 'tienda/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Polera - Store Poleras</title>
-    <link rel="icon" type="image/png" href="{% static 'img/pelota.png' %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
+{% block title %}Editar producto - Mundo Ligas Retro{% endblock %}
+
+{% block extra_css %}
     <style>
-        /* Estilos para el fondo a pantalla completa */
-        body {
-            /* Usamos un gradiente un poco más oscuro para que los campos del formulario resalten bien */
+        /* NUEVO: Contenedor que centra el cuadro en la pantalla completa y respeta el navbar */
+        .fondo-pantalla-completa {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
                         url('{% static "img/baner.jpeg" %}') no-repeat center center fixed;
             background-size: cover;
-            min-height: 100vh; /* min-height en vez de height por si el formulario es largo y hay que hacer scroll */
-            margin: 0;
+            min-height: calc(100vh - 70px); 
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3rem 1rem; /* Espacio arriba y abajo para que no choque con los bordes en celulares */
+            /* Padding generoso para dar espacio al navbar arriba y al footer abajo */
+            padding: 4rem 1rem; 
+            margin: 0; 
         }
 
         /* Estilos para la cajita flotante (Glassmorphism) */
@@ -29,20 +26,48 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 1rem;
             width: 100%;
-            max-width: 600px; /* Es un poco más ancha que el login porque tiene más campos */
+            max-width: 600px;
             padding: 2.5rem;
+            /* Margen extra para separar de los bordes verticales */
+            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
 
-        /* Estilizamos las etiquetas (títulos) de los campos que genera Django */
+        /* 
+           ESTILOS MÁGICOS PARA EL FORMULARIO DE DJANGO 
+           (Convierte los inputs aburridos en diseño premium)
+        */
         .edit-card label {
-            color: #0dcaf0; /* Color cyan (info) para que combine con el botón */
+            color:  #ffc107 !important; /* Cyan (info) para diferenciar de "Agregar" */
             font-weight: 600;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.5rem;
             margin-top: 1rem;
             font-size: 0.95rem;
+            display: block;
         }
         
-        /* Estilos para los textos de ayuda (ej. el texto de cómo escribir las tallas) */
+        .edit-card input, .edit-card textarea, .edit-card select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo negro transparente */
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-card input:focus, .edit-card textarea:focus, .edit-card select:focus {
+            outline: none;
+            border-color: #0dcaf0;
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 10px rgba(13, 202, 240, 0.3);
+        }
+
+        .edit-card input::placeholder, .edit-card textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        /* Textos de ayuda (ej. stock) */
         .helptext {
             font-size: 0.8rem;
             color: #ced4da;
@@ -50,43 +75,33 @@
             margin-top: 0.3rem;
             font-style: italic;
         }
-          /* Y para asegurarnos de que el "Stock por Talla:" (que es un label) sea amarillo como los demás: */
-        .add-card label, .edit-card label {
-            color: #ffc107 !important; /* Fuerza el amarillo */
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-            margin-top: 1rem;
-            font-size: 0.95rem;
-            display: inline-block;
-        }
-        /* Fuerza a que el texto de ejemplo (placeholder) sea blanco transparente */
-        .add-card input::placeholder, .edit-card input::placeholder {
-            color: rgba(255, 255, 255, 0.6) !important;
-        }
     </style>
-</head>
-<body>
+{% endblock %}
 
-    <div class="edit-card shadow-lg text-light">
-        <div class="text-center mb-4">
-            <h2 class="text-info fw-bold mb-1">✏️ Editar Polera</h2>
-            <p class="text-light opacity-75">{{ producto.nombre }}</p>
+{% block content %}
+    <!-- NUEVO: Envolvemos la tarjeta en el contenedor de fondo -->
+    <div class="fondo-pantalla-completa">
+        
+        <div class="edit-card shadow-lg text-light">
+            <div class="text-center mb-4">
+                <h2 class="text-info fw-bold mb-1">✏️ Editar Polera</h2>
+                <p class="text-light opacity-75">{{ producto.nombre }}</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top border-secondary border-opacity-50">
+                    <a href="{% url 'catalogo' %}" class="text-light text-decoration-none opacity-75 small hover-warning transition-all">
+                        ← Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-info fw-bold px-4 text-dark rounded-pill shadow-lg text-uppercase" style="letter-spacing: 1px;">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
         
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            
-            <div class="d-flex justify-content-between align-items-center mt-5">
-                <a href="{% url 'catalogo' %}" class="text-light text-decoration-none opacity-75 small hover-warning">
-                    ← Cancelar
-                </a>
-                <button type="submit" class="btn btn-info fw-bold px-4 text-dark rounded-pill shadow">
-                    Guardar Cambios
-                </button>
-            </div>
-        </form>
     </div>
-
-</body>
-</html>
+{% endblock %}
