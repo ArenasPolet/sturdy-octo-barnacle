@@ -1,6 +1,21 @@
 from django import forms
 from .models import Producto, DisenoPersonalizado
 
+
+
+class MultipleFileInput(forms.FileInput):
+    allow_multiple_selected = True
+
+    def value_from_datadict(self, data, files, name):
+        # TRUCO MAESTRO: Interceptamos las fotos cuando Django las está leyendo
+        if hasattr(files, 'getlist'):
+            archivos = files.getlist(name)
+            if archivos:
+                # Le entregamos SOLO LA PRIMERA a la validación principal para que no colapse.
+                # (En el views.py igual podremos capturarlas todas).
+                return archivos[0]
+        return None
+
 class ProductoForm(forms.ModelForm):
     # Campo auxiliar amigable para escribir el stock por talla
     texto_stock_tallas = forms.CharField(
@@ -16,12 +31,24 @@ class ProductoForm(forms.ModelForm):
 
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'precio', 'texto_stock_tallas', 'imagen']
+        fields = ['nombre','categoria', 'descripcion', 'precio', 'imagen', 'texto_stock_tallas']
+        labels = {
+            'imagen': '📸 Imágenes de la Polera (Puedes seleccionar varias)',
+        }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control border-secondary', 'style': 'background-color: #212529; color: #ffffff;'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control border-secondary', 'rows': 3, 'style': 'background-color: #212529; color: #ffffff;'}),
             'precio': forms.NumberInput(attrs={'class': 'form-control border-secondary', 'style': 'background-color: #212529; color: #ffffff;'}),
-            'imagen': forms.ClearableFileInput(attrs={'class': 'form-control border-secondary', 'style': 'background-color: #212529; color: #ffffff;'}),
+            'imagen': MultipleFileInput(attrs={
+                'class': 'form-control border-secondary', 
+                'style': 'background-color: #212529; color: #ffffff;'
+            }),
+        
+            'categoria': forms.TextInput(attrs={
+                'class': 'form-control border-secondary', 
+                'placeholder': 'Ej: Inglaterra, España, Selecciones...', 
+                'style': 'background-color: #212529; color: #ffffff;'
+            }),
         }
 
     def __init__(self, *args, **kwargs):

@@ -1,109 +1,12 @@
+<!-- Le decimos que use el diseño de base.html -->
+{% extends 'tienda/base.html' %} 
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Tienda de Poleras</title>
-    <!-- Favicon (Logo en la pestaña) -->
-    <link rel="icon" type="image/png" href="{% static 'img/pelota.jpg' %}">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!--  scroll suave -->
-    <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        /* Efecto de vidrio esmerilado para las tarjetas de productos */
-        .glass-card {
-            background-color: rgba(33, 37, 41, 0.7);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        /* Convierte el menú de celular en un cuadro flotante a la derecha */
-        @media (max-width: 991.98px) {
-            #navbarNav {
-                position: absolute; /* Lo saca del flujo normal para que flote */
-                top: 100%; /* Lo empuja justo por debajo de la barra negra */
-                right: 15px; /* Lo alinea a la derecha (debajo de la hamburguesa) */
-                width: 230px; /* Limita su ancho para que no ocupe toda la pantalla */
-                background-color: #111111; /* Un fondo negro elegante */
-                padding: 1rem;
-                border-radius: 0.5rem;
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
-                z-index: 1050;
-                margin-top: 5px; /* Un pequeñísimo espacio hacia arriba */
-            }
-        }
-    </style>
 
-</head>
+<!-- Todo lo que esté aquí adentro se meterá justo en la etiqueta <main> del base -->
+{% block content %}
+
+
 <body class="bg-dark text-light">
-
-    <!-- Navbar Moderno -->
-    <!-- Navbar Moderno y Responsivo -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-uppercase" href="{% url 'catalogo' %}">⚡ Store Poleras</a>
-        
-        <!-- Botón Hamburguesa -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- ms-auto empuja los botones hacia la derecha en PC -->
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0 pb-3 pb-lg-0">
-                
-                {% if user.is_authenticated and user.is_staff %}
-                    
-                    <!-- Saludo -->
-                    <li class="nav-item d-flex align-items-center justify-content-center justify-content-lg-end mb-2 mb-lg-0 me-lg-3">
-                        <span class="text-warning small">Hola, {{ user.username }}</span>
-                    </li>
-                    
-                    <!-- Botón Subir Polera -->
-                    <li class="nav-item">
-                        <a href="{% url 'agregar_producto' %}" class="btn btn-outline-warning btn-sm w-100">➕ Subir Polera</a>
-                    </li>
-                    
-                    <!-- Botón Ver Cotizaciones -->
-                    <li class="nav-item">
-                        <a href="{% url 'ver_cotizaciones' %}" class="btn btn-warning btn-sm fw-bold w-100 shadow-sm">📥 Ver Cotizaciones</a>
-                    </li>
-                    
-                    <!-- Formulario seguro para Cerrar Sesión -->
-                    <li class="nav-item">
-                        <form action="{% url 'logout' %}" method="post" class="w-100">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-sm w-100" title="Cerrar Sesión">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-                                    <path d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-                                </svg>
-                                <!-- Este texto solo aparece en celulares para que el botón se entienda mejor -->
-                                <span class="d-lg-none ms-1">Cerrar Sesión</span>
-                            </button>
-                        </form>
-                    </li>
-                    
-                {% else %}
-                    <!-- Icono de Iniciar Sesión para visitantes -->
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm w-100" title="Iniciar Sesión (Admin)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="me-1">
-                                <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                            </svg>
-                            <span class="d-lg-none">Iniciar Sesión</span>
-                        </a>
-                    </li>
-                {% endif %}
-                
-            </ul>
-        </div>
-    </div>
-</nav>
-        
 
     <!-- BANNER PRINCIPAL (HERO SECTION) -->
     <div class="mb-5 text-white text-center position-relative overflow-hidden shadow-lg" 
@@ -121,10 +24,57 @@
     </div>
 
 
-     <!-- Contenido Principal -->
-    <div class="container py-5" id="seccion-productos">
-        <h1 class="text-center mb-5 fw-bold text-white tracking-wide">Nuestras Poleras</h1>
-        <div class="row">
+    <!-- 2. CONTENEDOR PRINCIPAL DEL CATÁLOGO -->
+    <div class="container my-5" id="seccion-productos">
+
+        <h2 class="text-center fw-bold mb-5 text-warning text-uppercase" style="letter-spacing: 2px;">
+            Nuestras Poleras
+        </h2>
+
+        <!-- ==========================================
+             INICIO: TU FILTRO DE CATEGORÍAS RESTAURADO
+        =========================================== -->
+        {% if categorias %}
+        <div class="mb-5 d-flex flex-column align-items-center">
+            <h6 class="text-secondary text-uppercase mb-2 fw-bold tracking-wide" style="letter-spacing: 1px;">Filtrar Catálogo</h6>
+            
+            <div class="dropdown">
+                <!-- Botón principal -->
+                <button class="btn btn-dark border border-secondary px-4 py-2 dropdown-toggle shadow-lg fw-bold text-warning rounded-pill fs-5" type="button" id="dropdownCategorias" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #111111;">
+                    {% if categoria_filtro %}
+                        🎯 {{ categoria_filtro }}
+                    {% else %}
+                        🌍 Todas las Poleras
+                    {% endif %}
+                </button>
+                
+                <!-- Menú desplegable -->
+                <ul class="dropdown-menu dropdown-menu-dark shadow-lg border-secondary rounded-4 mt-2 py-2 text-center" aria-labelledby="dropdownCategorias" style="background-color: #1a1d20; min-width: 200px;">
+                    
+                    <li>
+                        <a class="dropdown-item fw-bold py-2 {% if not categoria_filtro %}text-warning bg-black{% endif %}" href="{% url 'catalogo' %}">
+                            🌍 Todas las Poleras
+                        </a>
+                    </li>
+                    
+                    <li><hr class="dropdown-divider border-secondary opacity-50"></li>
+                    
+                    {% for cat in categorias %}
+                        <li>
+                            <a class="dropdown-item fw-bold py-2 {% if categoria_filtro == cat %}text-warning bg-black{% else %}text-light{% endif %}" href="?categoria={{ cat|urlencode }}">
+                                {{ cat }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+       
+        <!-- FIN: FILTRO DE CATEGORÍAS -->
+
+        <div class="row"> 
             {% for producto in productos %}
             <div class="col-md-4 mb-5">
                 <!-- 1. TARJETA SÓLIDA: Color negro puro (#111111) para que no se camufle con el fondo -->
@@ -133,10 +83,12 @@
                     <!-- 2. CONTENEDOR DE IMAGEN CON PRECIO FLOTANTE -->
                     <div class="position-relative">
                         {% if producto.imagen %}
-                            <img src="{{ producto.imagen.url }}" class="card-img-top bg-white" alt="{{ producto.nombre }}" style="height: 260px; object-fit: cover;">
+                            <a href="{% url 'detalle_producto' producto.id %}">
+                                <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="object-fit: cover; height: 350px;">
+                            </a>
                         {% endif %}
                         
-                        <!-- Etiqueta de precio montada sobre la foto (Estilo E-commerce PRO) -->
+                        <!-- Etiqueta de precio  -->
                         <div class="position-absolute bottom-0 end-0 mb-3 me-3">
                             <span class="badge bg-warning text-dark fs-5 px-3 py-2 rounded-pill shadow-lg border border-warning">
                                 ${{ producto.precio_formateado }}
@@ -175,9 +127,41 @@
                             </button>
                             
                             {% if user.is_authenticated and user.is_staff %}
-                                <a href="{% url 'editar_producto' producto.id %}" class="btn btn-outline-info btn-sm rounded-pill fw-bold mt-1">
-                                    ✏️ Editar Polera
-                                </a>
+
+                                <!-- Contenedor de botones de Admin (Mitad y Mitad) -->
+                                <div class="mt-2 d-flex gap-2">
+                                    <!-- Botón Editar -->
+                                    <a href="{% url 'editar_producto' producto.id %}" class="btn btn-outline-info btn-sm w-50 rounded-pill fw-bold d-flex flex-column align-items-center justify-content-center py-1">
+                                        <span class="fs-6 lh-1 mt-1">✏️</span>
+                                        <span style="font-size: 0.65rem; text-transform: uppercase; margin-top: 2px;">Editar</span>
+                                    </a>
+                                    
+                                   <!-- Botón Eliminar Moderno -->
+                                    <form id="form-eliminar-{{ producto.id }}" action="{% url 'eliminar_producto' producto.id %}" method="post" class="w-50 m-0">
+                                        {% csrf_token %}
+                                        <!-- IMPORTANTE: Cambiamos type="submit" por type="button" -->
+                                        <button type="button" onclick="confirmarEliminacion('{{ producto.id }}')" class="btn btn-outline-danger btn-sm w-100 h-100 rounded-pill fw-bold d-flex flex-column align-items-center justify-content-center py-1">
+                                            <span class="fs-6 lh-1 mt-1">🗑️</span>
+                                            <span style="font-size: 0.65rem; text-transform: uppercase; margin-top: 2px;">Eliminar</span>
+                                        </button>                                      
+                                    </form>
+                                </div>
+                                <!-- BLOQUE DE VENTA RÁPIDA (Solo para ti) -->
+                                <div class="mt-3 p-2 rounded-3 border border-warning border-opacity-50 d-flex flex-column justify-content-center" style="background-color: rgba(255, 193, 7, 0.05); height: 120px;">
+                                    <span class="text-warning small d-block mb-2 fw-bold text-center">⚡ Venta Rápida (Descontar 1)</span>
+                                    <div class="d-flex flex-wrap justify-content-center gap-1">
+                                        {% for talla, stock in producto.stock_tallas.items %}
+                                            {% if stock > 0 %}
+                                                <form action="{% url 'descontar_stock_rapido' producto.id talla %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-warning btn-sm py-0 px-2 fw-bold shadow-sm" title="Descontar 1 de talla {{ talla }}">
+                                                        {{ talla }} <span class="opacity-75 small">(-1)</span>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -191,6 +175,49 @@
             </div>
             {% endfor %}
         </div>
+        
+          <!-- INICIO DE LA PAGINACIÓN PARA EL CATÁLOGO -->
+        {% if productos.has_other_pages %}
+        <nav aria-label="Navegación de páginas" class="mt-5 pb-5">
+            <ul class="pagination justify-content-center">
+                <!-- Botón Anterior -->
+                {% if productos.has_previous %}
+                <li class="page-item shadow-sm">
+                    <a class="page-link bg-dark text-warning border-secondary" href="?page={{ productos.previous_page_number }}{% if categoria_filtro %}&categoria={{ categoria_filtro|urlencode }}{% endif %}">&laquo; Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled shadow-sm">
+                    <span class="page-link bg-dark text-secondary border-secondary opacity-50">&laquo; Anterior</span>
+                </li>
+                {% endif %}
+
+                <!-- Números de Página -->
+                {% for i in productos.paginator.page_range %}
+                    {% if productos.number == i %}
+                    <li class="page-item active shadow-sm" aria-current="page">
+                        <span class="page-link bg-warning text-dark border-warning fw-bold">{{ i }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item shadow-sm">
+                        <a class="page-link bg-dark text-light border-secondary" href="?page={{ i }}{% if categoria_filtro %}&categoria={{ categoria_filtro|urlencode }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Botón Siguiente -->
+                {% if productos.has_next %}
+                <li class="page-item shadow-sm">
+                    <a class="page-link bg-dark text-warning border-secondary" href="?page={{ productos.next_page_number }}{% if categoria_filtro %}&categoria={{ categoria_filtro|urlencode }}{% endif %}">Siguiente &raquo;</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled shadow-sm">
+                    <span class="page-link bg-dark text-secondary border-secondary opacity-50">Siguiente &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        <!-- FIN DE LA PAGINACIÓN -->
         <!-- SECCIÓN DE PEDIDOPOLERA  -->
         <div class="mt-5 p-5 bg-black rounded-4 shadow-lg border border-secondary text-center">
             <h2 class="fw-bold text-white mb-3">¿No encuentras lo que buscas? </h2>
@@ -199,66 +226,24 @@
                 Cotizar Polera 🚀
             </a>
         </div>
+    
     </div>
+  
 
-    <!-- FIN DEL CONTENIDO PRINCIPAL -->
+  
 
-    <!-- FOOTER MODERNO -->
-    <footer class="bg-black text-light py-5 mt-5 border-top border-secondary">
-        <div class="container">
-            <div class="row">
-                <!-- Columna 1: Marca y Descripción -->
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-warning fw-bold text-uppercase mb-3">⚡ Store Poleras</h5>
-                    <p class="text-light opacity-75 small">
-                        Las mejores poleras de fútbol con diseños únicos y exclusivos. Alta calidad garantizada para lucir tu pasión futbolera con estilo propio.
-                    </p>
-                </div>
-                
-                <!-- Columna 2: Enlaces Rápidos -->
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-white fw-bold mb-3">Navegación</h5>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2">
-                            <a href="#seccion-productos" class="text-light opacity-75 text-decoration-none">Catálogo de Productos</a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'pedir_personalizado' %}" class="text-light opacity-75 text-decoration-none">Cotizar Polera Personalizada</a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'login' %}" class="text-light opacity-75 text-decoration-none">Acceso Administrador</a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- Columna 3: Contacto -->
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-white fw-bold mb-3">Contacto</h5>
-                    <ul class="list-unstyled small text-light opacity-75">
-                        <li class="mb-2">📍 Santiago, Chile</li>
-                        <li class="mb-2">📱 +56 9 1234 5678</li> <!-- Recuerda poner tu número -->
-                        <li class="mb-2">✉️ contacto@storepoleras.cl</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <hr class="border-secondary mt-3 mb-4">
-            
-            <!-- Derechos de Autor -->
-            <div class="text-center small text-light opacity-50">
-                &copy; 2026 Store Poleras. Todos los derechos reservados.<br>
-                Desarrollado por Poly🌙
-            </div>
-        </div>
-    </footer>
+{% endblock %}
 
-
-    <!-- Bootstrap 5 JS Bundle -->
+ <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+{% block extra_js %}
 
+<!-- 1. LIBRERÍA SWEETALERT2 (Para alertas modernas) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Script para enviar pedido por WhatsApp con validación de talla -->
     <script>
+        
         function enviarWhatsApp(productoId, nombreProducto, urlImagen) {
             // 1. Buscamos el selector de talla exacto de este producto
             var selectTalla = document.getElementById('talla-' + productoId);
@@ -285,5 +270,29 @@
             // 6. Abrimos WhatsApp en una pestaña nueva
             window.open(urlFinal, '_blank');
         }
+
+        // 2. NUEVA FUNCIÓN PARA ELIMINAR CON ESTILO
+        function confirmarEliminacion(productoId) {
+            Swal.fire({
+                title: '¿Eliminar del catálogo?',
+                text: "No se borrará de tus ventas pasadas, pero los clientes ya no la verán.",
+                icon: 'warning',
+                background: '#1a1d20', // Color oscuro igual que tus tarjetas
+                color: '#ffffff', // Letra blanca
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545', // Rojo peligro
+                cancelButtonColor: '#6c757d',  // Gris secundario
+                confirmButtonText: '🗑️ Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backdrop: `rgba(0,0,0,0.8)` // Fondo oscuro detrás de la alerta
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si el usuario presiona "Sí, eliminar", enviamos el formulario real
+                    document.getElementById('form-eliminar-' + productoId).submit();
+                }
+            });
+        }
     </script>
-</html>
+
+{% endblock %}

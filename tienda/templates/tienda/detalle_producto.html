@@ -1,0 +1,159 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+<!-- AQUÍ INYECTAS EL TÍTULO DINÁMICO -->
+{% block title %}{{ producto.nombre }} - Mundo Ligas Retro{% endblock %}
+
+{% block extra_css %}
+     <style>
+        body { background-color: #111111; color: white; }
+        .miniatura { cursor: pointer; opacity: 0.6; transition: 0.3s; height: 80px; width: 80px; object-fit: cover; border: 2px solid transparent; }
+        .miniatura:hover, .miniatura.activa { opacity: 1; border-color: #ffc107; }
+        .imagen-principal-container { background-color: #f8f9fa; border-radius: 10px; overflow: hidden; text-align: center; }
+        .btn-whatsapp { background-color: #25D366; color: white; }
+        .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container my-5 pt-3">
+        
+        <!-- Botón Volver -->
+        <a href="{% url 'catalogo' %}" class="text-light opacity-75 text-decoration-none mb-4 d-inline-block fw-bold">
+            ← Volver al catálogo
+        </a>
+
+        <!-- TARJETA PRINCIPAL (Glassmorphism) -->
+        <div class="row glass-card p-4 p-md-5 rounded-4 shadow-lg border-secondary border-opacity-25">
+            
+            <!-- COLUMNA IZQUIERDA: GALERÍA DE IMÁGENES -->
+            <div class="col-md-6 mb-4 mb-md-0">
+                <!-- Imagen Grande Principal -->
+                <div class="imagen-principal-container mb-4 shadow-sm d-flex align-items-center justify-content-center" style="min-height: 400px; background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;">
+                    <img id="imagen-grande" src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid p-3" style="max-height: 500px; object-fit: contain;">
+                </div>
+
+                <!-- Miniaturas (Slider abajo) -->
+                <div class="d-flex gap-3 justify-content-center flex-wrap mt-3">
+                    <!-- La imagen principal también como miniatura -->
+                    <img src="{{ producto.imagen.url }}" class="miniatura activa shadow-sm rounded-3" onclick="cambiarImagen(this, '{{ producto.imagen.url }}')">
+                    
+                    <!-- Las imágenes extra -->
+                    {% for foto in producto.imagenes_extra.all %}
+                        <img src="{{ foto.imagen.url }}" class="miniatura shadow-sm rounded-3" onclick="cambiarImagen(this, '{{ foto.imagen.url }}')">
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: INFO DEL PRODUCTO (Estilo Retail) -->
+            <div class="col-md-6 d-flex flex-column justify-content-center ps-md-5">
+                
+                {% if producto.categoria %}
+                    <div class="mb-3">
+                        <span class="badge bg-secondary text-uppercase py-2 px-3 shadow-sm" style="letter-spacing: 1px;">
+                            {{ producto.categoria }}
+                        </span>
+                    </div>
+                {% endif %}
+                
+                <h1 class="fw-bold text-white mb-2" style="font-size: 2.5rem;">{{ producto.nombre }}</h1>
+                <h2 class="text-warning fw-bold mb-4 display-6">${{ producto.precio }}</h2>
+                
+                <p class="text-light opacity-75 mb-5" style="line-height: 1.6; font-size: 1.1rem;">
+                    {{ producto.descripcion|default:"Sin descripción detallada." }}
+                </p>
+
+                <!-- Tallas Disponibles Interactivos -->
+                <div class="mb-4">
+                    <h6 class="text-info fw-bold mb-3" style="letter-spacing: 0.5px;">SELECCIONA TU TALLA:</h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% for talla, stock in producto.stock_tallas.items %}
+                            {% if stock > 0 %}
+                                <!-- Botón seleccionable -->
+                                <button type="button" class="btn btn-outline-warning fw-bold btn-talla px-4 py-2 rounded-3 shadow-sm transition-all" onclick="seleccionarTalla(this, '{{ talla }}')">
+                                    {{ talla }}
+                                </button>
+                            {% else %}
+                                <!-- Talla Agotada -->
+                                <button type="button" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3 text-decoration-line-through opacity-50" disabled title="Agotada">
+                                    {{ talla }}
+                                </button>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Mensaje de error oculto con mejor diseño -->
+                    <div id="error-talla" class="alert alert-danger py-2 mt-3 mb-0 border-danger bg-dark text-danger fw-bold shadow-sm" style="display: none; font-size: 0.9rem;">
+                        ⚠️ Por favor, selecciona una talla primero.
+                    </div>
+                </div>
+
+                <!-- Botón de Compra Dinámico -->
+                <button type="button" onclick="enviarWhatsApp('{{ producto.nombre|escapejs }}', '{{ producto.imagen.url }}')" class="btn btn-whatsapp btn-lg w-100 fw-bold shadow-lg rounded-pill py-3 mt-4 mb-3 text-uppercase" style="letter-spacing: 1px;">
+                    Pedir por WhatsApp 📲
+                </button>
+                <p class="text-center text-secondary small mt-1">🔒 Pago seguro mediante transferencia bancaria.</p>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+   <!-- SCRIPT PARA CAMBIAR FOTOS Y SELECCIONAR TALLA -->
+    <script>
+        // 1. Función de la Galería
+        function cambiarImagen(elemento, urlImagen) {
+            document.getElementById('imagen-grande').src = urlImagen;
+            let miniaturas = document.getElementsByClassName('miniatura');
+            for(let i = 0; i < miniaturas.length; i++){
+                miniaturas[i].classList.remove('activa');
+            }
+            elemento.classList.add('activa');
+        }
+
+        // 2. Variable para recordar qué talla eligió el cliente
+        let tallaSeleccionada = '';
+
+        // 3. Función para marcar la talla en la pantalla
+        function seleccionarTalla(botonElement, talla) {
+            tallaSeleccionada = talla; // Guardamos la talla elegida
+            
+            // Escondemos el mensaje de error por si estaba visible
+            document.getElementById('error-talla').style.display = 'none';
+
+            // Le quitamos el fondo amarillo a todos los botones de talla
+            let botones = document.getElementsByClassName('btn-talla');
+            for(let i = 0; i < botones.length; i++){
+                botones[i].classList.remove('btn-warning', 'text-dark');
+                botones[i].classList.add('btn-outline-warning');
+            }
+
+            // Le ponemos el fondo amarillo solo al botón que el cliente tocó
+            botonElement.classList.remove('btn-outline-warning');
+            botonElement.classList.add('btn-warning', 'text-dark');
+        }
+
+        // 4. Función para armar el mensaje y abrir WhatsApp
+        function enviarWhatsApp(nombrePolera, urlImagen) {
+            // Validamos si eligió una talla
+            if (tallaSeleccionada === '') {
+                document.getElementById('error-talla').style.display = 'block';
+                return;
+            }
+
+            // PON TU NÚMERO DE TELÉFONO AQUÍ
+            let numeroDestino = "56986234977"; 
+            
+            // Armamos la ruta completa de la imagen
+            let linkCompleto = window.location.origin + urlImagen;
+            
+            // Sumamos el enlace al mensaje (arreglé los saltos de línea para que quede limpio en el cel)
+            let mensaje = `Hola! Me interesa comprar la polera: ${nombrePolera}\nTalla: ${tallaSeleccionada}\n\nAquí puedes ver la foto: ${linkCompleto}`;
+            
+            // Abrimos WhatsApp
+            let url = `https://wa.me/${numeroDestino}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+{% endblock %}

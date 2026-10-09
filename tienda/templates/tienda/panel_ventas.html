@@ -1,0 +1,203 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}Caja Registradora - Mundo Ligas Retro{% endblock %}
+
+{% block extra_css %}
+<!-- Librería Mágica para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body { background-color: #111111; color: white; }
+        .glass-card { background-color: #212529; border: 1px solid rgba(255,255,255,0.1); }
+        select, input { background-color: #000 !important; color: white !important; border: 1px solid #444 !important; }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <!-- Navbar de administrador rápida -->
+    <br>
+
+    <div class="container pb-5">
+        
+
+        <!-- SECCIÓN 2: HISTORIAL, FILTROS Y PDF -->
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <!-- Formulario de Filtro -->
+            <form method="get" class="d-flex gap-2 align-items-center">
+                <label class="text-light opacity-75 small">Filtrar historial:</label>
+                <select name="estado" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                    <option value="">Todas las ventas</option>
+                    <option value="Confirmada" {% if estado_filtro == 'Confirmada' %}selected{% endif %}>Solo Confirmadas</option>
+                    <option value="Rechazada" {% if estado_filtro == 'Rechazada' %}selected{% endif %}>Solo Rechazadas</option>
+                </select>
+            </form>
+            
+            <!-- Botón Exportar PDF -->
+            <button onclick="exportarPDF()" class="btn btn-outline-danger fw-bold shadow-sm">
+                📄 Exportar a PDF
+            </button>
+        </div>
+
+        <!-- AQUÍ EMPIEZA LA ZONA QUE SE EXPORTARÁ A PDF -->
+        <div id="zona-pdf" class="glass-card p-4 rounded-4 shadow-lg">
+            <h4 class="text-white fw-bold mb-3">Reporte de Ventas</h4>
+            
+            <div class="alert bg-black border border-secondary text-light d-flex justify-content-between">
+                <span>Total de ventas en este reporte: <strong>{{ ventas|length }}</strong></span>
+                <span class="text-success fs-5 fw-bold">Ingresos Calculados: ${{ total_ganado }}</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-bordered border-secondary mt-3 align-middle">
+                    <thead class="text-warning">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Polera</th>
+                            <th>Talla</th>
+                            <th>Cant.</th>
+                            <th>Stock Actual</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in ventas %}
+                        <tr>
+                            <td class="opacity-75 small">{{ v.fecha|date:"d/m/Y H:i" }}</td>
+                            <td class="fw-bold">{{ v.producto.nombre|default:"Polera Eliminada" }}</td>
+                            <td><span class="badge bg-secondary">{{ v.talla }}</span></td>
+                            <td>{{ v.cantidad }}</td>
+                            <td>
+                                <span class="badge {% if v.stock_disponible > 0 %}bg-info text-dark{% else %}bg-danger{% endif %} fw-bold">
+                                    {{ v.stock_disponible }} un.
+                                </span>
+                            </td>
+                            <td class="text-success fw-bold">${{ v.precio_total }}</td>
+                            <!-- Selector interactivo para cambiar de estado -->
+                            <td>
+                                <form action="{% url 'cambiar_estado_venta' v.id %}" method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <select name="nuevo_estado" onchange="this.form.submit()" 
+                                            class="form-select form-select-sm fw-bold text-white border-0 shadow-sm
+                                            {% if v.estado == 'Confirmada' %}bg-success{% else %}bg-danger{% endif %}"
+                                            style="cursor: pointer; width: 130px; font-size: 0.85rem;">
+                                        
+                                        <option value="Confirmada" {% if v.estado == 'Confirmada' %}selected{% endif %} class="bg-dark text-success">
+                                            Confirmada
+                                        </option>
+                                        
+                                        <option value="Rechazada" {% if v.estado == 'Rechazada' %}selected{% endif %} class="bg-dark text-danger">
+                                            Rechazada
+                                        </option>
+                                        
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-secondary py-4">No hay ventas registradas en este filtro.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- FIN DE LA ZONA PDF -->
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- SCRIPT MAGICO PARA LAS TALLAS Y EL PDF -->
+    <script>
+        // 1. Mostrar tallas dinámicamente según la polera elegida
+        const tallasPorProducto = {
+            {% for p in productos %}
+            "{{ p.id }}": [
+                {% for talla, stock in p.stock_tallas.items %}
+                    {% if stock > 0 %} "{{ talla }}", {% endif %}
+                {% endfor %}
+            ],
+            {% endfor %}
+        };
+
+        document.getElementById('select-producto').addEventListener('change', function() {
+            const id = this.value;
+            const selectTalla = document.getElementById('select-talla');
+            selectTalla.innerHTML = '<option value="" selected disabled>Selecciona la talla...</option>';
+            
+            if(tallasPorProducto[id]) {
+                tallasPorProducto[id].forEach(function(talla) {
+                    const opt = document.createElement('option');
+                    opt.value = talla; opt.textContent = talla;
+                    selectTalla.appendChild(opt);
+                });
+            }
+        });
+
+       // 3. LA MAGIA: Función PDF a prueba de fallos con "Clon Fantasma"
+        function exportarPDF() {
+            // 1. Buscamos la tabla original
+            const elementoOriginal = document.getElementById('zona-pdf');
+            if (!elementoOriginal) {
+                alert("Error: No se encontró la tabla a exportar.");
+                return;
+            }
+
+            // 2. Avisamos que estamos trabajando
+            const btn = document.querySelector('button[onclick="exportarPDF()"]');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando PDF...';
+            btn.disabled = true;
+
+            // 3. CREAMOS EL CLON INVISIBLE
+            // Esto permite modificarlo sin romper lo que tú ves en la pantalla
+            const elementoClon = elementoOriginal.cloneNode(true);
+            
+            // 4. LIMPIAMOS EL CLON (Convertimos los <select> interactivos en texto simple)
+            const formulariosClonados = elementoClon.querySelectorAll('form.m-0');
+            const selectoresOriginales = elementoOriginal.querySelectorAll('select[name="nuevo_estado"]');
+            
+            formulariosClonados.forEach((formClon, index) => {
+                // Vemos qué estado tiene el original
+                const estadoReal = selectoresOriginales[index].value;
+                
+                // Creamos un texto simple que se vea bonito en el PDF
+                const span = document.createElement('span');
+                span.className = 'badge ' + (estadoReal === 'Confirmada' ? 'bg-success' : 'bg-danger');
+                span.innerText = estadoReal;
+                
+                // Reemplazamos todo el formulario interactivo por este simple texto
+                formClon.parentNode.replaceChild(span, formClon);
+            });
+
+            // 5. Ajustamos colores para que el PDF no salga negro
+            elementoClon.classList.remove('glass-card');
+            elementoClon.style.backgroundColor = '#1a1d20';
+            elementoClon.style.padding = '20px';
+
+            // 6. Configuramos la exportación (Formato horizontal para que quepa todo)
+            const opciones = {
+                margin: 0.5,
+                filename: 'Reporte_Ventas_StorePoleras.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+            };
+
+            // 7. Generamos el PDF usando el Clon
+            html2pdf().set(opciones).from(elementoClon).save().then(() => {
+                // Restauramos el botón a la normalidad
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("Error al exportar:", err);
+                alert("Hubo un problema. Por favor intenta de nuevo.");
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            });
+        }
+    </script>
+{% endblock %}
