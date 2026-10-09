@@ -1,24 +1,20 @@
+{% extends 'tienda/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Cotizar Diseño Personalizado - Store Poleras</title>
-    <link rel="icon" type="image/png" href="{% static 'img/pelota.png' %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+{% block title %}Cotizar Diseño Personalizado - Mundo Ligas Retro{% endblock %}
+
+{% block extra_css %}
     <style>
-        /* Fondo a pantalla completa */
-        body {
+        /* NUEVO: Contenedor que centra el cuadro en la pantalla completa y respeta el navbar */
+        .fondo-pantalla-completa {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
                         url('{% static "img/baner.jpeg" %}') no-repeat center center fixed;
             background-size: cover;
-            min-height: 100vh;
-            margin: 0;
+            min-height: calc(100vh - 70px); 
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3rem 1rem;
+            padding: 4rem 1rem; 
+            margin: 0; 
         }
 
         /* Tarjeta flotante con efecto de vidrio */
@@ -30,17 +26,41 @@
             width: 100%;
             max-width: 600px;
             padding: 2.5rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
 
-        /* Etiquetas de los campos en amarillo para mantener la identidad de tu marca */
+        /* ESTILOS MÁGICOS PARA EL FORMULARIO DE DJANGO */
         .custom-card label {
-            color: #ffc107; 
+            color: #ffc107 !important; /* Amarillo warning */
             font-weight: 600;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.5rem;
             margin-top: 1rem;
             font-size: 0.95rem;
+            display: block;
         }
         
+        .custom-card input, .custom-card textarea, .custom-card select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.5) !important; /* Fondo negro transparente */
+            color: white !important;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-card input:focus, .custom-card textarea:focus, .custom-card select:focus {
+            outline: none;
+            border-color: #25D366; /* Borde verde WhatsApp al escribir */
+            background-color: rgba(0, 0, 0, 0.8) !important;
+            box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);
+        }
+
+        .custom-card input::placeholder, .custom-card textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
         .helptext {
             font-size: 0.8rem;
             color: #adb5bd;
@@ -49,28 +69,34 @@
             font-style: italic;
         }
     </style>
-</head>
-<body>
+{% endblock %}
 
-    <div class="custom-card shadow-lg text-light text-center">
-        <h2 class="mb-3 text-warning fw-bold">Cotiza tu polera</h2>
-        <p class="text-light opacity-75 mb-4">Sube la imagen de la polera que quieres y cuéntanos los detalles. Te redirigiremos a WhatsApp para cotizarla.</p>
+{% block content %}
+    <!-- Envolvemos la tarjeta en el contenedor de fondo -->
+    <div class="fondo-pantalla-completa">
         
-        <form method="post" enctype="multipart/form-data" class="text-start">
-            {% csrf_token %}
-            {{ form.as_p }}
-            
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-5">
-                <a href="{% url 'catalogo' %}" class="text-light text-decoration-none opacity-75 small hover-warning mb-3 mb-sm-0">
-                    ← Volver al catálogo
-                </a>
-                <!-- El botón sigue siendo verde (success) para asociarlo mentalmente con WhatsApp -->
-                <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill shadow">
-                    Cotizar por WhatsApp 📲
-                </button>
+        <div class="custom-card shadow-lg text-light text-center">
+            <div class="mb-4">
+                <h2 class="text-warning fw-bold mb-2">Cotiza tu polera</h2>
+                <p class="text-light opacity-75 mb-0 small">Sube la imagen de la polera que quieres y cuéntanos los detalles. Te redirigiremos a WhatsApp para cotizarla.</p>
             </div>
-        </form>
+            
+            <form method="post" enctype="multipart/form-data" class="text-start">
+                {% csrf_token %}
+                
+                {{ form.as_p }}
+                
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-5 pt-3 border-top border-secondary border-opacity-50">
+                    <a href="{% url 'catalogo' %}" class="text-light text-decoration-none opacity-75 small hover-warning mb-3 mb-sm-0 transition-all">
+                        ← Volver al catálogo
+                    </a>
+                    
+                    <button type="submit" class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow text-uppercase" style="letter-spacing: 1px;">
+                        Cotizar por WhatsApp 📲
+                    </button>
+                </div>
+            </form>
+        </div>
+        
     </div>
-
-</body>
-</html>
+{% endblock %}

@@ -1,4 +1,6 @@
 from django import forms
+from django.core.exceptions import ValidationError
+import re
 from .models import Producto, DisenoPersonalizado
 
 
@@ -91,16 +93,32 @@ class DisenoPersonalizadoForm(forms.ModelForm):
             }),
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control border-secondary', 
+                'pattern': '[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+',
+                'title': 'Solo se permiten letras y espacios',
                 'placeholder': 'Ej: Juan Pérez',
                 'style': 'background-color: #212529; color: #ffffff;'
             }),
             # Agregamos el diseño para el teléfono
             'telefono': forms.TextInput(attrs={
                 'class': 'form-control border-secondary', 
+                'type': 'number',         # Fuerza el teclado numérico
+                'pattern': '[0-9]*',      # Solo permite números
                 'placeholder': 'Ej: +56912345678',
                 'style': 'background-color: #212529; color: #ffffff;'
             }),
         }
+
+    # 2. LA VALIDACIÓN DE SEGURIDAD: Python revisa el dato antes de guardarlo
+    def clean_nombre(self):
+        # Capturamos lo que el cliente escribió en el campo "nombre"
+        nombre = self.cleaned_data.get('nombre')
+        
+        # Revisamos si contiene algo que no sean letras, acentos, ñ o espacios
+        if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', nombre):
+            # Si tiene números o símbolos raros, Django bloquea el guardado y lanza este error
+            raise ValidationError("El nombre solo puede contener letras y espacios. No uses números ni símbolos.")
+            
+        return nombre
 
 #  función para que los campos sean obligatorios en la página
     def __init__(self, *args, **kwargs):

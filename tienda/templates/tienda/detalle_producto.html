@@ -87,7 +87,26 @@
                         ⚠️ Por favor, selecciona una talla primero.
                     </div>
                 </div>
-
+                <!-- Selector de Cantidad -->
+                <div class="mb-4">
+                    <h6 class="text-info fw-bold mb-3" style="letter-spacing: 0.5px;">CANTIDAD:</h6>
+                    
+                    <!-- input-group fuerza a que todos tengan exactamente la misma altura -->
+                    <div class="input-group shadow-sm" style="width: 140px;">
+                        <!-- Botón Menos -->
+                        <button class="btn btn-dark border border-secondary text-warning fw-bold px-3" type="button" onclick="cambiarCantidad(-1)">
+                            −
+                        </button>
+                        
+                        <!-- Número Central -->
+                        <input type="number" id="cantidad-producto" class="form-control text-center fw-bold fs-5 border-secondary bg-transparent text-white px-0" value="1" min="1" readonly style="border-left: none; border-right: none; box-shadow: none;">
+                        
+                        <!-- Botón Más -->
+                        <button class="btn btn-dark border border-secondary text-warning fw-bold px-3" type="button" onclick="cambiarCantidad(1)">
+                            +
+                        </button>
+                    </div>
+                </div>
                 <!-- Botón de Compra Dinámico -->
                 <button type="button" onclick="enviarWhatsApp('{{ producto.nombre|escapejs }}', '{{ producto.imagen.url }}')" class="btn btn-whatsapp fw-bold shadow rounded-pill py-2 px-5 mt-4 mb-3 text-uppercase align-self-start" style="letter-spacing: 1px; font-size: 0.95rem;">
                     Pedir por WhatsApp 📲
@@ -100,7 +119,7 @@
 {% endblock %}
 
 {% block extra_js %}
-   <!-- SCRIPT PARA CAMBIAR FOTOS Y SELECCIONAR TALLA -->
+   <!-- SCRIPT PARA CAMBIAR FOTOS, TALLA Y CANTIDAD -->
     <script>
         // 1. Función de la Galería
         function cambiarImagen(elemento, urlImagen) {
@@ -117,24 +136,32 @@
 
         // 3. Función para marcar la talla en la pantalla
         function seleccionarTalla(botonElement, talla) {
-            tallaSeleccionada = talla; // Guardamos la talla elegida
-            
-            // Escondemos el mensaje de error por si estaba visible
+            tallaSeleccionada = talla; 
             document.getElementById('error-talla').style.display = 'none';
 
-            // Le quitamos el fondo amarillo a todos los botones de talla
             let botones = document.getElementsByClassName('btn-talla');
             for(let i = 0; i < botones.length; i++){
                 botones[i].classList.remove('btn-warning', 'text-dark');
                 botones[i].classList.add('btn-outline-warning');
             }
 
-            // Le ponemos el fondo amarillo solo al botón que el cliente tocó
             botonElement.classList.remove('btn-outline-warning');
             botonElement.classList.add('btn-warning', 'text-dark');
         }
 
-        // 4. Función para armar el mensaje y abrir WhatsApp
+        // 4. NUEVO: Función para sumar o restar la cantidad
+        function cambiarCantidad(cambio) {
+            let inputCantidad = document.getElementById('cantidad-producto');
+            let valorActual = parseInt(inputCantidad.value);
+            let nuevoValor = valorActual + cambio;
+            
+            // Aseguramos que el cliente nunca pueda pedir "0" o menos poleras
+            if (nuevoValor >= 1) {
+                inputCantidad.value = nuevoValor;
+            }
+        }
+
+        // 5. ACTUALIZADO: Función para armar el mensaje y abrir WhatsApp
         function enviarWhatsApp(nombrePolera, urlImagen) {
             // Validamos si eligió una talla
             if (tallaSeleccionada === '') {
@@ -142,14 +169,16 @@
                 return;
             }
 
+            // Capturamos la cantidad que el cliente quiere
+            let cantidadSeleccionada = document.getElementById('cantidad-producto').value;
+
             // PON TU NÚMERO DE TELÉFONO AQUÍ
             let numeroDestino = "56986234977"; 
             
-            // Armamos la ruta completa de la imagen
             let linkCompleto = window.location.origin + urlImagen;
             
-            // Sumamos el enlace al mensaje (arreglé los saltos de línea para que quede limpio en el cel)
-            let mensaje = `Hola! Me interesa comprar la polera: ${nombrePolera}\nTalla: ${tallaSeleccionada}\n\nAquí puedes ver la foto: ${linkCompleto}`;
+            // Armamos el mensaje final incluyendo la CANTIDAD
+            let mensaje = `Hola! Me interesa comprar la polera: ${nombrePolera}\nTalla: ${tallaSeleccionada}\nCantidad: ${cantidadSeleccionada} unidades\n\nAquí puedes ver la foto: ${linkCompleto}`;
             
             // Abrimos WhatsApp
             let url = `https://wa.me/${numeroDestino}?text=${encodeURIComponent(mensaje)}`;
