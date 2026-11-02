@@ -4,7 +4,7 @@
 {% block title %}Caja Registradora - Mundo Ligas Retro{% endblock %}
 
 {% block extra_css %}
-<!-- Librería Mágica para exportar a PDF -->
+    <!-- Librería para exportar a PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -15,13 +15,9 @@
 {% endblock %}
 
 {% block content %}
-
-    <!-- Navbar de administrador rápida -->
     <br>
 
     <div class="container pb-5">
-        
-
         <!-- SECCIÓN 2: HISTORIAL, FILTROS Y PDF -->
         <div class="d-flex justify-content-between align-items-end mb-3">
             <!-- Formulario de Filtro -->
@@ -98,7 +94,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center text-secondary py-4">No hay ventas registradas en este filtro.</td>
+                            <td colspan="7" class="text-center text-secondary py-4">No hay ventas registradas en este filtro.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -110,7 +106,6 @@
 {% endblock %}
 
 {% block extra_js %}
-    <!-- SCRIPT MAGICO PARA LAS TALLAS Y EL PDF -->
     <script>
         // 1. Mostrar tallas dinámicamente según la polera elegida
         const tallasPorProducto = {
@@ -123,81 +118,195 @@
             {% endfor %}
         };
 
-        document.getElementById('select-producto').addEventListener('change', function() {
-            const id = this.value;
-            const selectTalla = document.getElementById('select-talla');
-            selectTalla.innerHTML = '<option value="" selected disabled>Selecciona la talla...</option>';
-            
-            if(tallasPorProducto[id]) {
-                tallasPorProducto[id].forEach(function(talla) {
-                    const opt = document.createElement('option');
-                    opt.value = talla; opt.textContent = talla;
-                    selectTalla.appendChild(opt);
-                });
-            }
-        });
-
-       // 3. LA MAGIA: Función PDF a prueba de fallos con "Clon Fantasma"
-        function exportarPDF() {
-            // 1. Buscamos la tabla original
-            const elementoOriginal = document.getElementById('zona-pdf');
-            if (!elementoOriginal) {
-                alert("Error: No se encontró la tabla a exportar.");
-                return;
-            }
-
-            // 2. Avisamos que estamos trabajando
-            const btn = document.querySelector('button[onclick="exportarPDF()"]');
-            const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando PDF...';
-            btn.disabled = true;
-
-            // 3. CREAMOS EL CLON INVISIBLE
-            // Esto permite modificarlo sin romper lo que tú ves en la pantalla
-            const elementoClon = elementoOriginal.cloneNode(true);
-            
-            // 4. LIMPIAMOS EL CLON (Convertimos los <select> interactivos en texto simple)
-            const formulariosClonados = elementoClon.querySelectorAll('form.m-0');
-            const selectoresOriginales = elementoOriginal.querySelectorAll('select[name="nuevo_estado"]');
-            
-            formulariosClonados.forEach((formClon, index) => {
-                // Vemos qué estado tiene el original
-                const estadoReal = selectoresOriginales[index].value;
+        const selectProd = document.getElementById('select-producto');
+        if (selectProd) {
+            selectProd.addEventListener('change', function() {
+                const id = this.value;
+                const selectTalla = document.getElementById('select-talla');
+                selectTalla.innerHTML = '<option value="" selected disabled>Selecciona la talla...</option>';
                 
-                // Creamos un texto simple que se vea bonito en el PDF
-                const span = document.createElement('span');
-                span.className = 'badge ' + (estadoReal === 'Confirmada' ? 'bg-success' : 'bg-danger');
-                span.innerText = estadoReal;
-                
-                // Reemplazamos todo el formulario interactivo por este simple texto
-                formClon.parentNode.replaceChild(span, formClon);
-            });
-
-            // 5. Ajustamos colores para que el PDF no salga negro
-            elementoClon.classList.remove('glass-card');
-            elementoClon.style.backgroundColor = '#1a1d20';
-            elementoClon.style.padding = '20px';
-
-            // 6. Configuramos la exportación (Formato horizontal para que quepa todo)
-            const opciones = {
-                margin: 0.5,
-                filename: 'Reporte_Ventas_StorePoleras.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
-            };
-
-            // 7. Generamos el PDF usando el Clon
-            html2pdf().set(opciones).from(elementoClon).save().then(() => {
-                // Restauramos el botón a la normalidad
-                btn.innerHTML = textoOriginal;
-                btn.disabled = false;
-            }).catch(err => {
-                console.error("Error al exportar:", err);
-                alert("Hubo un problema. Por favor intenta de nuevo.");
-                btn.innerHTML = textoOriginal;
-                btn.disabled = false;
+                if(tallasPorProducto[id]) {
+                    tallasPorProducto[id].forEach(function(talla) {
+                        const opt = document.createElement('option');
+                        opt.value = talla; opt.textContent = talla;
+                        selectTalla.appendChild(opt);
+                    });
+                }
             });
         }
+
+        // 2. Exportación a PDF con adaptación de estilos explícitos
+        function exportarPDF() {
+    const elementoOriginal = document.getElementById('zona-pdf');
+    if (!elementoOriginal) {
+        alert("Error: No se encontró la tabla a exportar.");
+        return;
+    }
+
+    const btn = document.querySelector('button[onclick="exportarPDF()"]');
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = '⏳ Generando PDF...';
+    btn.disabled = true;
+
+    // 1. Clonar el elemento
+    const elementoClon = elementoOriginal.cloneNode(true);
+
+    // 2. Convertir selectores de estado en Badges de texto plano
+    const formulariosClonados = elementoClon.querySelectorAll('form.m-0');
+    const selectoresOriginales = elementoOriginal.querySelectorAll('select[name="nuevo_estado"]');
+
+    formulariosClonados.forEach((formClon, index) => {
+        const estadoReal = selectoresOriginales[index] ? selectoresOriginales[index].value : 'Confirmada';
+        const span = document.createElement('span');
+        span.style.padding = '4px 10px';
+        span.style.borderRadius = '12px';
+        span.style.fontWeight = 'bold';
+        span.style.fontSize = '11px';
+        span.style.display = 'inline-block';
+
+        if (estadoReal === 'Confirmada') {
+            span.style.backgroundColor = '#198754';
+            span.style.color = '#ffffff';
+        } else {
+            span.style.backgroundColor = '#dc3545';
+            span.style.color = '#ffffff';
+        }
+        span.innerText = estadoReal;
+        formClon.parentNode.replaceChild(span, formClon);
+    });
+
+    // 3. LIMPIEZA DE CONTENEDOR Y TEMA BLANCO
+    elementoClon.style.backgroundColor = '#ffffff';
+    elementoClon.style.color = '#111111';
+    elementoClon.style.padding = '25px';
+    elementoClon.classList.remove('glass-card', 'shadow-lg');
+
+    // 4. FIX DEL TÍTULO "Reporte de Ventas" (Elimina text-white)
+    const titulo = elementoClon.querySelector('h4');
+    if (titulo) {
+        titulo.classList.remove('text-white', 'text-light');
+        titulo.style.color = '#111111';
+        titulo.style.fontSize = '22px';
+        titulo.style.fontWeight = 'bold';
+        titulo.style.marginBottom = '15px';
+        titulo.style.borderBottom = '2px solid #212529';
+        titulo.style.paddingBottom = '8px';
+    }
+
+    // 5. CUADRO DE RESUMEN
+    const alertBox = elementoClon.querySelector('.alert');
+    if (alertBox) {
+        alertBox.classList.remove('bg-black', 'border-secondary', 'text-light', 'alert');
+        alertBox.style.backgroundColor = '#f8f9fa';
+        alertBox.style.border = '1px solid #dee2e6';
+        alertBox.style.borderRadius = '8px';
+        alertBox.style.padding = '14px 20px';
+        alertBox.style.marginBottom = '20px';
+        alertBox.style.display = 'flex';
+        alertBox.style.justifyContent = 'space-between';
+        alertBox.style.alignItems = 'center';
+
+        const todosLosElementos = alertBox.querySelectorAll('*');
+        todosLosElementos.forEach(el => {
+            if (el.classList.contains('text-success')) {
+                el.style.color = '#198754';
+                el.style.fontWeight = 'bold';
+                el.style.fontSize = '16px';
+            } else {
+                el.style.color = '#212529';
+            }
+        });
+    }
+
+    // 6. TABLA Y ENCABEZADOS CLAROS
+    const tabla = elementoClon.querySelector('table');
+    if (tabla) {
+        tabla.classList.remove('table-dark', 'table-hover', 'table-bordered', 'border-secondary');
+        tabla.style.width = '100%';
+        tabla.style.borderCollapse = 'collapse';
+        tabla.style.marginTop = '10px';
+
+        // Encabezado de la tabla
+        const ths = tabla.querySelectorAll('th');
+        ths.forEach(th => {
+            th.classList.remove('text-warning');
+            th.style.backgroundColor = '#e9ecef';
+            th.style.color = '#212529';
+            th.style.padding = '10px 12px';
+            th.style.border = '1px solid #ced4da';
+            th.style.textAlign = 'left';
+            th.style.fontSize = '12px';
+            th.style.fontWeight = 'bold';
+        });
+
+        // Filas
+        const trs = tabla.querySelectorAll('tbody tr');
+        trs.forEach((tr, i) => {
+            const bg = i % 2 === 0 ? '#ffffff' : '#f8f9fa';
+            const tds = tr.querySelectorAll('td');
+            tds.forEach(td => {
+                td.style.backgroundColor = bg;
+                td.style.color = '#212529';
+                td.style.padding = '10px 12px';
+                td.style.borderBottom = '1px solid #e0e0e0';
+                td.style.fontSize = '11px';
+
+                const badges = td.querySelectorAll('.badge');
+                badges.forEach(b => {
+                    b.style.padding = '4px 8px';
+                    b.style.borderRadius = '10px';
+                    b.style.fontSize = '10px';
+                    b.style.fontWeight = 'bold';
+                    if (b.classList.contains('bg-secondary')) {
+                        b.style.backgroundColor = '#6c757d';
+                        b.style.color = '#ffffff';
+                    } else if (b.classList.contains('bg-info')) {
+                        b.style.backgroundColor = '#0dcaf0';
+                        b.style.color = '#000000';
+                    } else if (b.classList.contains('bg-danger')) {
+                        b.style.backgroundColor = '#dc3545';
+                        b.style.color = '#ffffff';
+                    }
+                });
+            });
+        });
+    }
+
+    // 7. Contenedor temporal fuera de pantalla
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '-9999px';
+    wrapper.style.width = '1050px';
+    wrapper.appendChild(elementoClon);
+    document.body.appendChild(wrapper);
+
+    // 8. Opciones de exportación
+    const opciones = {
+        margin: [0.3, 0.3, 0.3, 0.3],
+        filename: 'Reporte_Ventas_MundoLigasRetro.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            backgroundColor: '#ffffff',
+            logging: false
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+    };
+
+    html2pdf().set(opciones).from(elementoClon).save().then(() => {
+        document.body.removeChild(wrapper);
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+    }).catch(err => {
+        console.error("Error al exportar:", err);
+        if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+        alert("Hubo un problema al generar el PDF.");
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+    });
+}
+        
     </script>
 {% endblock %}
